@@ -1,6 +1,5 @@
 package com.example.newapp.core.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -12,13 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 
 @Composable
-fun NewNavigationBar(
+fun BottomNavBar(
     selectedKey: NavKey,
     onSelectKey: (NavKey) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
-        modifier = modifier
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         TOP_LEVEL_DESTINATIONS.forEach { (topLevelDestination, data) ->
             NavigationBarItem(
@@ -48,8 +48,7 @@ fun NewNavigationBar(
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                )
             )
         }
     }

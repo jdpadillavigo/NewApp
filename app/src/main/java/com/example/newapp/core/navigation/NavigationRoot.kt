@@ -25,7 +25,7 @@ fun NavigationRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val navigationState = rememberNavigationState(
-        startRoute =Route.Home,
+        startRoute = Route.Home,
         topLevelRoutes = TOP_LEVEL_DESTINATIONS.keys
     )
     val navigator = remember {
@@ -33,8 +33,13 @@ fun NavigationRoot(
     }
     Scaffold(
         modifier = modifier,
+        topBar = {
+            TopNavBar(
+                currentRoute = navigationState.topLevelRoute
+            )
+        },
         bottomBar = {
-            NewNavigationBar(
+            BottomNavBar(
                 selectedKey = navigationState.topLevelRoute,
                 onSelectKey = {
                     navigator.navigate(it)
