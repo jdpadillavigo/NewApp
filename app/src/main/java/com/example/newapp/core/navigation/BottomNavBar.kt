@@ -1,5 +1,6 @@
 package com.example.newapp.core.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 
 @Composable
@@ -23,6 +25,7 @@ fun BottomNavBar(
         TOP_LEVEL_DESTINATIONS.forEach { (topLevelDestination, data) ->
             NavigationBarItem(
                 selected = topLevelDestination == selectedKey,
+                modifier = Modifier.padding(bottom = 10.dp),
                 onClick = {
                     onSelectKey(topLevelDestination)
                 },

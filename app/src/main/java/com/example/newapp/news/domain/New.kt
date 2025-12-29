@@ -1,7 +1,7 @@
 package com.example.newapp.news.domain
 
 data class New(
-    val source: List<Source>,
+    val source: Source,
     val author: String,
     val title: String,
     val description: String,

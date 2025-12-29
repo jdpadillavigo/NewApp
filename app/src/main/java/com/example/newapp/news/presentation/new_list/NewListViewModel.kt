@@ -9,7 +9,6 @@ import com.example.newapp.news.presentation.models.toNewUi
 import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,7 +20,6 @@ class NewListViewModel: ViewModel() {
 
     private val _state = MutableStateFlow(NewListState())
     val state = _state
-        .onStart { loadEverything() }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
@@ -31,17 +29,27 @@ class NewListViewModel: ViewModel() {
     private fun loadEverything() {
         viewModelScope.launch {
             _state.update { it.copy(
-                isLoading = true
+                isLoading = true,
+                errorMessage = null
             )}
 
-            when {
-                remoteNewDataSource.getEverything().status == "ok" -> _state.update { it.copy(
-                    isLoading = false,
-                    news = remoteNewDataSource.getEverything().articles?.map { it.toNewUi() } ?: emptyList()
-                )}
-                else -> _state.update { it.copy(
-                    isLoading = false
-                )}
+            val response = remoteNewDataSource.getEverything(
+                query = "peru"
+            )
+            if (response.status == "ok") {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        news = response.articles?.map { new -> new.toNewUi() } ?: emptyList()
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = response.message
+                    )
+                }
             }
         }
     }
@@ -49,17 +57,27 @@ class NewListViewModel: ViewModel() {
     private fun loadTopHeadlines() {
         viewModelScope.launch {
             _state.update { it.copy(
-                isLoading = true
+                isLoading = true,
+                errorMessage = null
             )}
 
-            when {
-                remoteNewDataSource.getTopHeadlines().status == "ok" -> _state.update { it.copy(
-                    isLoading = false,
-                    news = remoteNewDataSource.getTopHeadlines().articles?.map { it.toNewUi() } ?: emptyList()
-                )}
-                else -> _state.update { it.copy(
-                    isLoading = false
-                )}
+            val response = remoteNewDataSource.getTopHeadlines(
+                language = "en"
+            )
+            if (response.status == "ok") {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        news = response.articles?.map { new -> new.toNewUi() } ?: emptyList()
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = response.message
+                    )
+                }
             }
         }
     }
@@ -72,6 +90,13 @@ class NewListViewModel: ViewModel() {
         when(action) {
             is NewListAction.OnNewClick -> {
                 selectNew(action.newUi)
+            }
+            is NewListAction.OnRetryClick -> {
+                if(action.load == "everything") {
+                    loadEverything()
+                } else {
+                    loadTopHeadlines()
+                }
             }
         }
     }

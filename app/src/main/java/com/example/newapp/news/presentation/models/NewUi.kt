@@ -8,7 +8,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 data class NewUi(
-    val source: List<SourceUi>,
+    val source: SourceUi,
     val author: String,
     val title: String,
     val description: String,
@@ -31,19 +31,32 @@ fun New.toNewUi(): NewUi {
             .replace("\\r", "\r")
             .replace("\\t", "\t")
 
+        val noJs = normalized
+            .replace(
+                Regex("\\{\\s*window\\.open[\\s\\S]*?\\}\\s*,?\\s*\\d*\\);?", RegexOption.IGNORE_CASE),
+                ""
+            )
+            .replace(
+                Regex("return[\\s\\n\\r]*false", RegexOption.IGNORE_CASE),
+                ""
+            )
+
         val noHtml = HtmlCompat.fromHtml(
-            normalized,
+            noJs,
             HtmlCompat.FROM_HTML_MODE_LEGACY
         ).toString()
 
-        val clean = noHtml.replace(Regex("\\[\\+\\d+ chars\\]"), "")
+        val clean = noHtml
+            .replace(Regex("\\[\\+\\d+ chars\\]"), "")
+            .replace(Regex(">"), "")
+            .replace(Regex("\\s{2,}"), " ")
 
         return clean
     }
     val formattedContent = formatContent(content)
 
     return NewUi(
-        source = source.map { it.toSourceUi() },
+        source = source.toSourceUi(),
         author = author,
         title = title,
         description = description,

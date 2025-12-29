@@ -7,14 +7,14 @@ import com.example.newapp.news.domain.Source
 
 fun NewDto.toNew(): New {
     return New(
-        source = source.map { it.toSource() },
-        author = author,
-        title = title,
-        description = description,
-        url = url,
-        urlToImage = urlToImage,
-        publishedAt = publishedAt,
-        content = content
+        source = (source ?: SourceDto()).toSource(),
+        author = author.orEmpty(),
+        title = title.orEmpty(),
+        description = description.orEmpty(),
+        url = url.orEmpty(),
+        urlToImage = urlToImage.orEmpty(),
+        publishedAt = publishedAt.orEmpty(),
+        content = content.orEmpty()
     )
 }
 

@@ -2,8 +2,8 @@ package com.example.newapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Background = Color(0xFF54AAF0)
-val BackgroundDark = Color(0xFF54AAF0)
+val Background = Color(0xFFFFFFFF)
+val BackgroundDark = Color(0xFF000000)
 
 val Primary = Color(0xFF0B86E9)
 val PrimaryDark = Color(0xFF0B86E9)

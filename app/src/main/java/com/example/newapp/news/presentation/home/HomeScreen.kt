@@ -43,7 +43,8 @@ fun HomeScreen(
         HeaderLabel("Recommendation")
         NewListScreen(
             state = state,
-            onAction = onAction
+            onAction = onAction,
+            loadNews = "top-headlines"
         )
     }
 }

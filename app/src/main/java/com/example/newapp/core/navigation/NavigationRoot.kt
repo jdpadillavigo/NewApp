@@ -14,6 +14,7 @@ import com.example.newapp.news.presentation.bookmark.BookmarkScreen
 import com.example.newapp.news.presentation.discover.DiscoverScreen
 import com.example.newapp.news.presentation.home.HomeScreen
 import com.example.newapp.news.presentation.new_detail.NewDetailScreen
+import com.example.newapp.news.presentation.new_list.NewListAction
 import com.example.newapp.news.presentation.new_list.NewListViewModel
 import com.example.newapp.news.presentation.profile.ProfileScreen
 
@@ -31,20 +32,29 @@ fun NavigationRoot(
     val navigator = remember {
         Navigator(navigationState)
     }
+
+    val currentStack = navigationState.backStacks[navigationState.topLevelRoute]
+    val currentRoute = currentStack?.lastOrNull() ?: navigationState.topLevelRoute
+    val shouldShowBars = currentRoute != Route.NewDetail
+
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopNavBar(
-                currentRoute = navigationState.topLevelRoute
-            )
+            if (shouldShowBars) {
+                TopNavBar(
+                    currentRoute = navigationState.topLevelRoute
+                )
+            }
         },
         bottomBar = {
-            BottomNavBar(
-                selectedKey = navigationState.topLevelRoute,
-                onSelectKey = {
-                    navigator.navigate(it)
-                }
-            )
+            if (shouldShowBars) {
+                BottomNavBar(
+                    selectedKey = navigationState.topLevelRoute,
+                    onSelectKey = {
+                        navigator.navigate(it)
+                    }
+                )
+            }
         }
     ) { innerPadding ->
         NavDisplay(
@@ -57,18 +67,29 @@ fun NavigationRoot(
                     entry<Route.NewDetail> {
                         NewDetailScreen(
                             state = state,
+                            onBack = navigator::goBack,
                         )
                     }
                     entry<Route.Home> {
                         HomeScreen(
                             state = state,
-                            onAction = { navigator.navigate(Route.NewDetail) }
+                            onAction = { action ->
+                                viewModel.onAction(action)
+                                if (action is NewListAction.OnNewClick) {
+                                    navigator.navigate(Route.NewDetail)
+                                }
+                            }
                         )
                     }
                     entry<Route.Discover> {
                         DiscoverScreen(
                             state = state,
-                            onAction = { navigator.navigate(Route.NewDetail) }
+                            onAction = { action ->
+                                viewModel.onAction(action)
+                                if (action is NewListAction.OnNewClick) {
+                                    navigator.navigate(Route.NewDetail)
+                                }
+                            }
                         )
                     }
                     entry<Route.Bookmark> {

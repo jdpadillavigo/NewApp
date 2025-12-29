@@ -1,7 +1,6 @@
 package com.example.newapp.news.presentation.new_detail
 
 import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,15 +34,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
-import com.example.newapp.R
+import coil.compose.AsyncImage
 import com.example.newapp.news.domain.New
 import com.example.newapp.news.domain.Source
 import com.example.newapp.news.presentation.models.toNewUi
@@ -53,9 +53,8 @@ import com.example.newapp.ui.theme.NewAppTheme
 @Composable
 fun NewDetailScreen(
     state: NewListState,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.tertiary)
 ) {
     if(state.isLoading) {
         Box(
@@ -71,10 +70,15 @@ fun NewDetailScreen(
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
         val iconColors = IconButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f),
-            contentColor = MaterialTheme.colorScheme.secondary,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f),
-            disabledContentColor = MaterialTheme.colorScheme.secondary
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface
+        )
+
+        var gradientColors: List<Color> = listOf(
+            MaterialTheme.colorScheme.onSurface,
+            MaterialTheme.colorScheme.onSurface
         )
 
         LazyColumn(
@@ -87,40 +91,47 @@ fun NewDetailScreen(
                     modifier = Modifier.height(screenHeight * 0.5f),
                     contentAlignment = Alignment.Center
                 ) {
-//                    AsyncImage(
-//                        model = new.urlToImage,
-//                        contentDescription = "",
-//                        contentScale = ContentScale.Crop,
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .align(Alignment.Center)
-//                    )
-                    Image(
-                        painterResource(R.drawable.image1),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center)
-                    )
+                    if(new.urlToImage != "") {
+                        AsyncImage(
+                            model = new.urlToImage,
+                            contentDescription = "New's image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center)
+                        )
+
+                        gradientColors = listOf(
+                            MaterialTheme.colorScheme.onSurface,
+                            Color.Transparent,
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "New's image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center)
+                                .padding(85.dp)
+                                .zIndex(1f),
+                            tint = MaterialTheme.colorScheme.surface
+                        )
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Black,
-                                        Color.Transparent,
-                                        Color.Transparent,
-                                        Color.Black
-                                    ),
+                                    colors = gradientColors
                                 )
                             )
                             .align(Alignment.Center)
                             .padding(20.dp)
                     ) {
                         IconButton(
-                            onClick = {},
+                            onClick = onBack,
                             modifier = Modifier.align(Alignment.TopStart),
                             colors = iconColors
                         ) {
@@ -158,7 +169,7 @@ fun NewDetailScreen(
                         ) {
                             Text(
                                 text = new.title,
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = MaterialTheme.colorScheme.surface,
                                 fontSize = 24.sp,
                                 lineHeight = 30.sp,
                                 fontWeight = FontWeight.Bold,
@@ -167,7 +178,7 @@ fun NewDetailScreen(
                             )
                             Text(
                                 text = new.publishedAt.toTimeAgo(),
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = MaterialTheme.colorScheme.surface,
                                 fontSize = 14.sp
                             )
                         }
@@ -177,7 +188,7 @@ fun NewDetailScreen(
             item {
                 Column (
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.tertiary)
+                        .background(MaterialTheme.colorScheme.onSurface)
                         .clip(
                             RoundedCornerShape(
                                 topStart = 30.dp,
@@ -189,7 +200,7 @@ fun NewDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     Text(
-                        text = new.source.first().name,
+                        text = new.source.name,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -233,7 +244,8 @@ fun NewDetailScreenPreview() {
         NewDetailScreen(
             state = NewListState(
                 selectedNew = previewNew.toNewUi()
-            )
+            ),
+            onBack = {}
         )
     }
 }
@@ -244,7 +256,7 @@ internal val previewSource = Source(
 )
 
 internal val previewNew = New(
-    source = listOf(previewSource),
+    source = previewSource,
     author = "David Pierce",
     title = "Alexander wears modified helmet in road races",
     description = "Hi, friends! Welcome to Installer No. 110, your guide to the best and Verge-iest stuff in the world. (If you're new here, welcome, happy holidays, and also you can read all the old editions at the Installer homepage.) This week, I've been reading about mall S…",

@@ -54,7 +54,8 @@ fun DiscoverScreen(
         )
         NewListScreen(
             state = state,
-            onAction = onAction
+            onAction = onAction,
+            loadNews = "everything"
         )
     }
 }

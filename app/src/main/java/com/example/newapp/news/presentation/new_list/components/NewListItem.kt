@@ -1,6 +1,5 @@
 package com.example.newapp.news.presentation.new_list.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,19 +10,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.newapp.R
+import coil.compose.AsyncImage
 import com.example.newapp.news.presentation.models.NewUi
 import com.example.newapp.news.presentation.models.SourceUi
 import com.example.newapp.news.presentation.models.toFormattedPublishedAt
@@ -42,24 +43,26 @@ fun NewListItem(
             .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-//        AsyncImage(
-//            new.urlToImage,
-//            contentDescription = "",
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier
-//                .fillMaxWidth(0.35f)
-//                .fillMaxHeight()
-//                .clip(RoundedCornerShape(15.dp))
-//        )
-        Image(
-            painterResource(R.drawable.image1),
-            contentDescription = "",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth(0.35f)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(15.dp))
-        )
+        if(newUi.urlToImage != "") {
+            AsyncImage(
+                newUi.urlToImage,
+                contentDescription = "New's image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth(0.35f)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(15.dp))
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Image,
+                contentDescription = "New's image",
+                modifier = Modifier
+                    .fillMaxWidth(0.35f)
+                    .fillMaxHeight(),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
         Column {
             Text(
                 text = newUi.title,
@@ -71,15 +74,37 @@ fun NewListItem(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = newUi.author + "  •  " + newUi.publishedAt.toFormattedPublishedAt(),
-                fontSize = 18.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if(newUi.author != "") {
+                    TextInfo(
+                        modifier = Modifier.fillMaxWidth(0.35f),
+                        text = newUi.author
+                    )
+                    if(newUi.publishedAt != "") {
+                        TextInfo(text = "  •  ")
+                    }
+                }
+                TextInfo(text = newUi.publishedAt.toFormattedPublishedAt())
+            }
         }
     }
+}
+
+@Composable
+fun TextInfo(
+    modifier: Modifier = Modifier,
+    text: String
+) {
+    Text(
+        text = text,
+        fontSize = 18.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
+    )
 }
 
 @PreviewLightDark
@@ -101,7 +126,7 @@ internal val previewSource = SourceUi(
 )
 
 internal val previewNew = NewUi(
-    source = listOf(previewSource),
+    source = previewSource,
     author = "David Pierce",
     title = "What Training Do Voleyball Players Need? What Training Do Voleyball Players Need?",
     description = "Hi, friends! Welcome to Installer No. 110, your guide to the best and Verge-iest stuff in the world. (If you're new here, welcome, happy holidays, and also you can read all the old editions at the Installer homepage.) This week, I've been reading about mall S…",

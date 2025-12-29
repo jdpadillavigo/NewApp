@@ -16,6 +16,7 @@ data class RemoteNewDataSource(
 ): NewDataSource {
     override suspend fun getEverything(
         query: String?,
+        queryInTitle: String?,
         searchIn: List<String>?,
         sources: List<String>?,
         domains: List<String>?,
@@ -34,6 +35,7 @@ data class RemoteNewDataSource(
                 ) {
                     parameter("apiKey", BuildConfig.API_KEY)
                     if(query != "" && query != null) parameter("q", query)
+                    if(queryInTitle != "" && queryInTitle != null) parameter("qInTitle", queryInTitle)
                     if(searchIn != listOf("") && searchIn != null) parameter("searchIn", searchIn.joinToString(","))
                     if(sources != listOf("") && sources != null) parameter("sources", sources.joinToString(","))
                     if(domains != listOf("") && domains != null) parameter("domains", domains.joinToString(","))
@@ -62,7 +64,8 @@ data class RemoteNewDataSource(
         sources: List<String>?,
         query: String?,
         pageSize: Int?,
-        page: Int?
+        page: Int?,
+        language: String?
     ): NewResponse {
         var paramsQuantity = 0
         return safeCall(
@@ -86,6 +89,7 @@ data class RemoteNewDataSource(
                     if(query != "" && query != null) parameter("q", query)
                     if(pageSize != null) parameter("pageSize", pageSize)
                     if(page != null) parameter("page", page)
+                    if(language != "" && language != null) parameter("language", language)
                 }
             },
             onSuccess = { responseBody ->

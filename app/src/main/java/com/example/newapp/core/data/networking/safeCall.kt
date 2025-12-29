@@ -1,7 +1,8 @@
 package com.example.newapp.core.data.networking
 
+import android.util.Log
 import com.example.newapp.core.domain.util.NetworkError
-import com.example.newapp.core.presentation.util.toMessage
+import com.example.newapp.core.presentation.util.toLogMessage
 import com.example.newapp.news.data.networking.dto.NewResponseDto
 import com.example.newapp.news.domain.NewResponse
 import io.ktor.client.call.NoTransformationFoundException
@@ -14,6 +15,7 @@ suspend fun safeCall(
     execute: suspend () -> HttpResponse,
     onSuccess: (NewResponseDto) -> NewResponse
 ): NewResponse {
+    val tag = "safeCall"
     return try {
         val response = execute()
         when (response.status.value) {
@@ -22,35 +24,43 @@ suspend fun safeCall(
                     val responseBody = response.body<NewResponseDto>()
                     onSuccess(responseBody)
                 } catch (e: NoTransformationFoundException) {
-                    println(NetworkError.SERIALIZATION.toMessage())
-                    NewResponse(status = "error")
+                    val message = NetworkError.SERIALIZATION.toLogMessage()
+                    Log.e(tag, message, e)
+                    NewResponse(status = "error", message = message)
                 }
             }
             408 -> {
-                println(NetworkError.REQUEST_TIMEOUT.toMessage())
-                NewResponse(status = "error")
+                val message = NetworkError.REQUEST_TIMEOUT.toLogMessage()
+                Log.w(tag, "HTTP 408: $message")
+                NewResponse(status = "error", message = message)
             }
             429 -> {
-                println(NetworkError.TOO_MANY_REQUESTS.toMessage())
-                NewResponse(status = "error")
+                val message = NetworkError.TOO_MANY_REQUESTS.toLogMessage()
+                Log.w(tag, "HTTP 429: $message")
+                NewResponse(status = "error", message = message)
             }
             in 500..599 -> {
-                println(NetworkError.SERVER_ERROR.toMessage())
-                NewResponse(status = "error")
+                val message = NetworkError.SERVER_ERROR.toLogMessage()
+                Log.e(tag, "HTTP ${response.status.value}: $message")
+                NewResponse(status = "error", message = message)
             }
             else -> {
-                println(NetworkError.UNKNOWN.toMessage())
-                NewResponse(status = "error")
+                val message = NetworkError.UNKNOWN.toLogMessage()
+                Log.e(tag, message)
+                NewResponse(status = "error", message = message)
             }
         }
     } catch (e: UnresolvedAddressException) {
-        println(NetworkError.NO_INTERNET.toMessage())
-        NewResponse(status = "error")
+        val message = NetworkError.NO_INTERNET.toLogMessage()
+        Log.e(tag, message, e)
+        NewResponse(status = "error", message = message)
     } catch (e: SerializationException) {
-        println(NetworkError.SERIALIZATION.toMessage())
-        NewResponse(status = "error")
+        val message = NetworkError.SERIALIZATION.toLogMessage()
+        Log.e(tag, message, e)
+        NewResponse(status = "error", message = message)
     } catch (e: Exception) {
-        println(NetworkError.UNKNOWN.toMessage())
-        NewResponse(status = "error")
+        val message = NetworkError.UNKNOWN.toLogMessage()
+        Log.e(tag, message, e)
+        NewResponse(status = "error", message = message)
     }
 }
