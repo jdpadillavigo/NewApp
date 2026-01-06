@@ -39,12 +39,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jdpadillavigo.newsapp.news.presentation.new_list.NewListAction
 import com.jdpadillavigo.newsapp.ui.theme.NewsAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchComponent(
     searchTopics: MutableList<String>,
+    onAction: (NewListAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var text by remember { mutableStateOf("") }
@@ -85,12 +87,14 @@ fun SearchComponent(
                 active = false
                 if (text.isNotBlank()) {
                     searchHistory.add(text)
+                    onAction(NewListAction.OnLoadClick(text))
+                } else {
+                    onAction(NewListAction.OnLoadClick("everything"))
                 }
             },
             active = active,
             onActiveChange = {
                 active = it
-                text = ""
             },
             placeholder = {
                 SearchText(
@@ -234,7 +238,8 @@ private fun SearchComponentPreview() {
                     "Gaming",
                     "World"
                 )
-            }
+            },
+            onAction = {}
         )
     }
 }

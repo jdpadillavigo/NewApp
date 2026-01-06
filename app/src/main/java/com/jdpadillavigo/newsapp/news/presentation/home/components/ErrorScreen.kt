@@ -63,7 +63,7 @@ fun ErrorScreen(
                 ErrorText(NetworkError.UNKNOWN.toMessage(context))
             }
             Button(
-                onClick = { onAction(NewListAction.OnRetryClick(loadNews)) },
+                onClick = { onAction(NewListAction.OnLoadClick(loadNews)) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.secondary

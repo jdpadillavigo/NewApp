@@ -18,8 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,62 +50,59 @@ fun DiscoverScreen(
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(loadNews) {
-        onAction(NewListAction.OnRetryClick(loadNews))
+        onAction(NewListAction.OnLoadClick(loadNews))
     }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
 
-    if(state.isLoading) {
-        LoadingScreen(modifier = modifier)
-    } else if(state.errorMessage != null) {
-        ErrorScreen(
-            state = state,
-            onAction = onAction,
-            loadNews = loadNews,
-            modifier = modifier
-        )
-    } else if(state.news.isEmpty()) {
-        EmptyScreen(modifier = modifier)
-    } else {
-        when(deviceConfiguration) {
-            DeviceConfiguration.MOBILE_PORTRAIT,
-            DeviceConfiguration.TABLET_PORTRAIT,
-            DeviceConfiguration.DESKTOP -> {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(top = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    DiscoverSearch()
-                    DiscoverList(
-                        state = state,
-                        onAction = onAction
-                    )
-                }
+    when(deviceConfiguration) {
+        DeviceConfiguration.MOBILE_PORTRAIT,
+        DeviceConfiguration.TABLET_PORTRAIT,
+        DeviceConfiguration.DESKTOP -> {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(top = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(15.dp)
+            ) {
+                DiscoverSearch(
+                    onAction = onAction
+                )
+                DiscoverList(
+                    state = state,
+                    onAction = onAction,
+                    loadNews = loadNews
+                )
             }
-            DeviceConfiguration.MOBILE_LANDSCAPE,
-            DeviceConfiguration.TABLET_LANDSCAPE -> {
-                Row(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    DiscoverSearch(modifier = Modifier.fillMaxWidth(0.5f))
-                    DiscoverList(
-                        state = state,
-                        onAction = onAction
-                    )
-                }
+        }
+        DeviceConfiguration.MOBILE_LANDSCAPE,
+        DeviceConfiguration.TABLET_LANDSCAPE -> {
+            Row(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                DiscoverSearch(
+                    onAction = onAction,
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                )
+                DiscoverList(
+                    state = state,
+                    onAction = onAction,
+                    loadNews = loadNews
+                )
             }
         }
     }
 }
 
 @Composable
-private fun DiscoverSearch(modifier: Modifier = Modifier) {
+private fun DiscoverSearch(
+    onAction: (NewListAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val searchTopics = remember {
         mutableStateListOf(
             "All",
@@ -114,7 +114,7 @@ private fun DiscoverSearch(modifier: Modifier = Modifier) {
         )
     }
 
-    val topicSelected = "All"
+    var topicSelected by remember { mutableStateOf("All") }
 
     Column(
         modifier = modifier,
@@ -136,7 +136,8 @@ private fun DiscoverSearch(modifier: Modifier = Modifier) {
             )
         }
         SearchComponent(
-            searchTopics = searchTopics
+            searchTopics = searchTopics,
+            onAction = onAction
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -155,7 +156,10 @@ private fun DiscoverSearch(modifier: Modifier = Modifier) {
                 } else {
                     TopicButton(
                         text = searchTopics[item],
-                        onClick = {},
+                        onClick = {
+                            topicSelected = searchTopics[item]
+                            onAction(NewListAction.OnLoadClick(searchTopics[item]))
+                        },
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -172,20 +176,34 @@ private fun DiscoverSearch(modifier: Modifier = Modifier) {
 private fun DiscoverList(
     state: NewListState,
     onAction: (NewListAction) -> Unit,
+    loadNews: String,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        NewListScreen(
+    if(state.isLoading) {
+        LoadingScreen(modifier = modifier)
+    } else if(state.errorMessage != null) {
+        ErrorScreen(
             state = state,
             onAction = onAction,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .align(Alignment.Center)
+            loadNews = loadNews,
+            modifier = modifier
         )
-        ScreenGradient(modifier = Modifier.align(Alignment.Center))
+    } else if(state.news.isEmpty()) {
+        EmptyScreen(modifier = modifier)
+    } else {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            NewListScreen(
+                state = state,
+                onAction = onAction,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .align(Alignment.Center)
+            )
+            ScreenGradient(modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
 

@@ -44,7 +44,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(loadNews) {
-        onAction(NewListAction.OnRetryClick(loadNews))
+        onAction(NewListAction.OnLoadClick(loadNews))
     }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass

@@ -34,16 +34,16 @@ data class RemoteNewDataSource(
                     urlString = constructUrl("/everything")
                 ) {
                     parameter("apiKey", BuildConfig.API_KEY)
-                    if(query != "" && query != null) parameter("q", query)
-                    if(queryInTitle != "" && queryInTitle != null) parameter("qInTitle", queryInTitle)
-                    if(searchIn != listOf("") && searchIn != null) parameter("searchIn", searchIn.joinToString(","))
-                    if(sources != listOf("") && sources != null) parameter("sources", sources.joinToString(","))
-                    if(domains != listOf("") && domains != null) parameter("domains", domains.joinToString(","))
-                    if(excludeDomains != listOf("") && excludeDomains != null) parameter("excludeDomains", excludeDomains.joinToString(","))
+                    if(!query.isNullOrBlank()) parameter("q", query)
+                    if(!queryInTitle.isNullOrBlank()) parameter("qInTitle", queryInTitle)
+                    if(!searchIn.isNullOrEmpty()) parameter("searchIn", searchIn.joinToString(","))
+                    if(!sources.isNullOrEmpty()) parameter("sources", sources.joinToString(","))
+                    if(!domains.isNullOrEmpty()) parameter("domains", domains.joinToString(","))
+                    if(!excludeDomains.isNullOrEmpty()) parameter("excludeDomains", excludeDomains.joinToString(","))
                     if(from != null) parameter("from", from.toString())
                     if(to != null) parameter("to", to.toString())
-                    if(language != "" && language != null) parameter("language", language)
-                    if(sortBy != "" && sortBy != null) parameter("sortBy", sortBy)
+                    if(!language.isNullOrBlank()) parameter("language", language)
+                    if(!sortBy.isNullOrBlank()) parameter("sortBy", sortBy)
                     if(pageSize != null) parameter("pageSize", pageSize)
                     if(page != null) parameter("page", page)
                 }
@@ -74,22 +74,22 @@ data class RemoteNewDataSource(
                     urlString = constructUrl("/top-headlines")
                 ) {
                     parameter("apiKey", BuildConfig.API_KEY)
-                    if(country != "" && country != null && paramsQuantity == 0) {
+                    if(!country.isNullOrBlank() && paramsQuantity == 0) {
                         parameter("country", country)
                         paramsQuantity++
                     }
-                    if(category != listOf("") && category != null && paramsQuantity == 0) {
+                    if(!category.isNullOrEmpty() && paramsQuantity == 0) {
                         parameter("category", category.joinToString(","))
                         paramsQuantity++
                     }
-                    if(sources != listOf("") && sources != null && paramsQuantity == 0) {
+                    if(!sources.isNullOrEmpty() && paramsQuantity == 0) {
                         parameter("sources", sources.joinToString(","))
                         paramsQuantity++
                     }
-                    if(query != "" && query != null) parameter("q", query)
+                    if(!query.isNullOrBlank()) parameter("q", query)
                     if(pageSize != null) parameter("pageSize", pageSize)
                     if(page != null) parameter("page", page)
-                    if(language != "" && language != null) parameter("language", language)
+                    if(!language.isNullOrBlank()) parameter("language", language)
                 }
             },
             onSuccess = { responseBody ->
